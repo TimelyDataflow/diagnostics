@@ -1,13 +1,16 @@
 [package]
-name = "tdiag-connect"
-version = "0.1.1-pre"
+name = "tdiag"
+version = "0.1.0-pre"
 authors = ["Andrea Lattuada <andrea@lattuada.me>"]
 homepage = "https://github.com/TimelyDataflow/diagnostics"
 repository = "https://github.com/TimelyDataflow/diagnostics.git"
-description = "Helpers to obtain traces suitable for diagnostics from timely / differential."
+description = "Tools to inspect a timely-dataflow computation"
 license = "MIT"
 
 edition = "2018"
 
 [dependencies]
 timely = "^0.9"
+differential-dataflow = "^0.9"
+clap = "^2.33"
+tdiag-connect = "^0.1"
