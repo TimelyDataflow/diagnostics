@@ -46,6 +46,7 @@ impl std::io::Read for TcpStreamOrFile {
 }
 
 /// Source of binary data for `make_replayers`.
+#[derive(Clone)]
 pub enum ReplaySource {
     Tcp(Arc<Mutex<Vec<Option<TcpStream>>>>),
     Files(Arc<Mutex<Vec<Option<PathBuf>>>>),
