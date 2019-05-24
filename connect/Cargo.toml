@@ -1,0 +1,8 @@
+[package]
+name = "timely-diag-connect"
+version = "0.1.0"
+authors = ["Andrea Lattuada <andrea.lattuada@inf.ethz.ch>"]
+edition = "2018"
+
+[dependencies]
+timely = "^0.9"
