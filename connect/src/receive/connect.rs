@@ -11,8 +11,11 @@ use std::path::PathBuf;
 /// computations we're examining (one socket for every worker on the
 /// examined computation).
 ///
+/// The sockets are wrapped in `Some(_)` because the result is commonly
+/// used as a an argument to `make_readers` in this module.
+///
 /// The sockets are returned in nonblocking mode.
-pub fn open_sockets(ip_addr: IpAddr, port: u16, source_peers: usize) -> Result<Vec<TcpStream>, ConnectError> {
+pub fn open_sockets(ip_addr: IpAddr, port: u16, source_peers: usize) -> Result<Vec<Option<TcpStream>>, ConnectError> {
     let socket_addr = (ip_addr, port).to_socket_addrs()?
         .next().ok_or(ConnectError::Other("Invalid listening address".to_string()))?;
     let listener = TcpListener::bind(socket_addr)?;
@@ -21,7 +24,7 @@ pub fn open_sockets(ip_addr: IpAddr, port: u16, source_peers: usize) -> Result<V
         if let Ok(ref s) = &socket {
             s.set_nonblocking(true)?;
         }
-        socket
+        socket.map(Some)
     }).collect::<Result<Vec<_>, _>>()?)
 }
 
