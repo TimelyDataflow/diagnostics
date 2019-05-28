@@ -1,3 +1,8 @@
+//! Command-line tools (with browser-based visualization)
+//! to inspect a timely-dataflow computation.
+//!
+//! See the README and --help for usage information.
+
 use tdiag::*;
 
 fn run() -> Result<(), DiagError> {

@@ -1,3 +1,5 @@
+//! "graph" subcommand: browser-based tool to display the dataflow graph.
+
 use std::sync::{Arc, Mutex};
 
 use crate::DiagError;
@@ -14,6 +16,15 @@ use tdiag_connect::receive::ReplayWithShutdown;
 
 static GRAPH_HTML: &str = include_str!("graph/dataflow-graph.html");
 
+/// Creates an html file that renders a timely dataflow graph.
+///
+/// 1. Listens to incoming connection from a timely-dataflow program with
+/// logging enabled;
+/// 2. runs a differential-dataflow program to reconstruct the source
+/// computation's dataflow graph;
+/// 3. writes an html file that renders the dataflow graph.
+///
+/// This module includes `graph/dataflow-graph.html` as a static resource.
 pub fn listen_and_render(
     timely_configuration: timely::Configuration,
     sockets: Vec<Option<std::net::TcpStream>>,
