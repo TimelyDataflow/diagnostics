@@ -12,19 +12,26 @@ the structure and resource usage of a dataflow.
 
 Each timely worker can be instructed to publish low-level event
 streams over a TCP socket, by setting the `TIMELY_WORKER_LOG_ADDR`
-environment variable. These logging streams are rather high volume —
-what better tool to analyse them than timely itself? In order to avoid
+environment variable. In order to cope with the high volume of
+these logging streams the diagnostic tools in this repository
+are themselves timely computations that we can scale out. In order to avoid
 confusion, we will refer to the workers of the dataflow *that is being
 analysed* as the `source peers`. The workers of the diagnostic
 computation we will refer to as `inspector
-peers`. [tdiag-connect](./connect) is a library of utiltities that can
+peers`.
+
+This repository contains a library, `tdiag-connect`, and a command
+line interface to the diagnostic tools, `tdiag`.
+
+`tdiag-connect` (in [`/connect`](./connect)) is a library of utiltities that can
 be used by inspector peers to source event streams from source peers.
 
-All tools are provided under a unified CLI, [tdiag](./tdiag).
+`tdiag` (in [/tdiag](./tdiag)) is an unified command line interface to all diagnostic
+tools (only one is currently available, more are coming).
 
-## Getting Started
+## Getting Started with `tdiag`
 
-`tdiag` is the CLI to all diagnostic tools. Install it via cargo:
+`tdiag` [![Crates.io](https://img.shields.io/crates/v/tdiag.svg)](https://crates.io/crates/tdiag) is the CLI to all diagnostic tools. Install it via cargo: 
 
 ``` shell
 cargo install tdiag
@@ -52,13 +59,13 @@ in this case).
 In a separate shell, start your source computation. In this case, we
 will analyse the [Timely PageRank
 example](https://github.com/TimelyDataflow/timely-dataflow/blob/master/timely/examples/pagerank.rs). From
-inside the `timely-datflow/timely` sub-directory, run:
+inside the `timely-dataflow/timely` sub-directory, run:
 
 ``` shell
-TIMELY_WORKER_LOG_ADDR="127.0.0.1:51317" cargo run --example pagerank 1000 1000000 -w 2
+env TIMELY_WORKER_LOG_ADDR="127.0.0.1:51317" cargo run --example pagerank 1000 1000000 -w 2
 ```
 
-Most importantly, `TIMELY_WORKER_LOG_ADDR="127.0.0.1:51317"` will
+Most importantly, `env TIMELY_WORKER_LOG_ADDR="127.0.0.1:51317"` will
 cause the source workers to connect to our diagnostic computation. The
 `-w` parameter specifies the number of workers we want to run the
 PageRank example with. Whatever we specify here therefore has to match
@@ -86,3 +93,12 @@ similar to the following:
 
 You can use your mouse or touchpad to move the graph around, and to
 zoom in and out.
+
+## The `tdiag-connect` library
+
+[![Crates.io](https://img.shields.io/crates/v/tdiag-connect.svg)](https://crates.io/crates/tdiag-connect) [![Docs](https://img.shields.io/badge/docs-.rs-blue.svg)](https://docs.rs/tdiag-connect)
+
+`tdiag-connect` (in [`/connect`](./connect)) is a library of utiltities that can
+be used by inspector peers to source event streams from source peers.
+
+Documentation is at [docs.rs/tdiag-connect](https://docs.rs/tdiag-connect).
