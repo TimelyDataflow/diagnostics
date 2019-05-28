@@ -1,8 +1,10 @@
 [package]
-name = "timely-diag-connect"
-version = "0.1.0"
-authors = ["Andrea Lattuada <andrea.lattuada@inf.ethz.ch>"]
+name = "tdiag-connect"
+version = "0.1.0-pre"
+authors = ["Andrea Lattuada <andrea@lattuada.me>"]
 edition = "2018"
+description = "Helpers to obtain traces suitable for diagnostics from timely / differential."
+license = "MIT"
 
 [dependencies]
 timely = "^0.9"
