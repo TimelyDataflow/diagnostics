@@ -5,3 +5,4 @@
 //! Subfolders in the source tree contain resource files.
 
 pub mod graph;
+pub mod profile;
