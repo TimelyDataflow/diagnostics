@@ -48,8 +48,13 @@ You can customize the interface and port for the receiver (this program) with --
                 .help("The output path for the generated html file (don't forget the .html extension)")
                 .required(true))
         )
-        .subcommand(clap::SubCommand::with_name("profile")
-            .about("Print total time spent running each operator")
+        .subcommand(
+            clap::SubCommand::with_name("profile")
+                .about("Print total time spent running each operator")
+        )
+        .subcommand(
+            clap::SubCommand::with_name("arrangements")
+                .about("Track the logical size of arrangements over the course of a computation")                    
         )
         .get_matches();
 
@@ -79,13 +84,19 @@ You can customize the interface and port for the receiver (this program) with --
             let sockets = tdiag_connect::receive::open_sockets(ip_addr, port, source_peers)?;
             println!("Trace sources connected");
             crate::commands::graph::listen_and_render(timely_configuration, sockets, output_path)
-        },
+        }
         ("profile", Some(_profile_args)) => {
             println!("Listening for {} connections on {}:{}", source_peers, ip_addr, port);
             let sockets = tdiag_connect::receive::open_sockets(ip_addr, port, source_peers)?;
             println!("Trace sources connected");
             crate::commands::profile::listen_and_profile(timely_configuration, sockets)
-        },
+        }
+        ("arrangements", Some(_args)) => {
+            println!("Listening for {} connections on {}:{}", source_peers, ip_addr, port);
+            let sockets = tdiag_connect::receive::open_sockets(ip_addr, port, source_peers)?;
+            println!("Trace sources connected");
+            crate::commands::arrangements::listen(timely_configuration, sockets)
+        }
         _                           => panic!("Invalid subcommand"),
     }
 }
