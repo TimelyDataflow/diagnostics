@@ -61,7 +61,7 @@ pub fn listen(
                 .filter(|(_, worker, _)| *worker == 0)
                 .flat_map(|(t, _, x)| {
                     if let Operates(event) = x {
-                        Some(((event.id, event.name), t, 1 as isize))
+                        Some(((event.id, format!("{} ({:?})", event.name, event.addr)), t, 1 as isize))
                     } else {
                         None
                     }
