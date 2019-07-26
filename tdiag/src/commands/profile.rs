@@ -1,4 +1,5 @@
-//! "profile" subcommand
+//! "profile" subcommand: reports aggregate runtime for each
+//! scope/operator.
 
 use std::sync::{Arc, Mutex};
 
@@ -14,15 +15,15 @@ use timely::logging::TimelyEvent::{Operates, Schedule};
 
 use tdiag_connect::receive::ReplayWithShutdown;
 
-// static GRAPH_HTML: &str = include_str!("graph/dataflow-graph.html");
-
-/// Creates TODO
+/// Prints aggregate time spent in each scope/operator.
 ///
-/// 1. Listens to incoming connection from a timely-dataflow program with
-/// logging enabled;
-/// 2. runs a differential-dataflow program TODO
-// /// TODO This module includes `graph/dataflow-graph.html` as a static resource.
-pub fn listen_and_compute(
+/// 1. Listens to incoming connections from a timely-dataflow program
+/// with logging enabled;
+/// 2. runs a differential-dataflow program to track scheduling events
+/// and derive runtime for each operator;
+/// 3. prints the resulting measurements alongside operator names and
+/// scope names;
+pub fn listen_and_profile(
     timely_configuration: timely::Configuration,
     sockets: Vec<Option<std::net::TcpStream>>) -> Result<(), crate::DiagError> {
 
@@ -30,9 +31,6 @@ pub fn listen_and_compute(
 
     let (output_send, output_recv) = ::std::sync::mpsc::channel();
     let output_send = Arc::new(Mutex::new(output_send));
-
-    // let (channels_send, channels_recv) = ::std::sync::mpsc::channel();
-    // let channels_send = Arc::new(Mutex::new(channels_send));
 
     let is_running = Arc::new(std::sync::atomic::AtomicBool::new(true));
     let is_running_w = is_running.clone();
