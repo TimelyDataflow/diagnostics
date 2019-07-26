@@ -49,7 +49,7 @@ You can customize the interface and port for the receiver (this program) with --
                 .required(true))
         )
         .subcommand(clap::SubCommand::with_name("profile")
-            .about("TODO")
+            .about("Print total time spent running each operator")
         )
         .get_matches();
 
@@ -84,7 +84,7 @@ You can customize the interface and port for the receiver (this program) with --
             println!("Listening for {} connections on {}:{}", source_peers, ip_addr, port);
             let sockets = tdiag_connect::receive::open_sockets(ip_addr, port, source_peers)?;
             println!("Trace sources connected");
-            crate::commands::profile::listen_and_compute(timely_configuration, sockets)
+            crate::commands::profile::listen_and_profile(timely_configuration, sockets)
         },
         _                           => panic!("Invalid subcommand"),
     }
