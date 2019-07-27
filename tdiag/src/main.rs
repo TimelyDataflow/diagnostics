@@ -55,14 +55,26 @@ You can customize the interface and port for the receiver (this program) with --
         _ => (),
     }
 
-    let ip_addr: std::net::IpAddr = args.value_of("interface").expect("error parsing args")
-        .parse().map_err(|e| DiagError(format!("Invalid --interface: {}", e)))?;
-    let port: u16 = args.value_of("port").expect("error parsing args")
-        .parse().map_err(|e| DiagError(format!("Invalid --port: {}", e)))?;
-    let source_peers: usize = args.value_of("source_peers").expect("error parsing args")
-        .parse().map_err(|e| DiagError(format!("Invalid --source-peers: {}", e)))?;
-    let diag_workers: usize = args.value_of("diag_workers").expect("error parsing args")
-        .parse().map_err(|e| DiagError(format!("Invalid --diag-workers: {}", e)))?;
+    let ip_addr: std::net::IpAddr = args
+        .value_of("interface")
+        .expect("error parsing args")
+        .parse()
+        .map_err(|e| DiagError(format!("Invalid --interface: {}", e)))?;
+    let port: u16 = args
+        .value_of("port")
+        .expect("error parsing args")
+        .parse()
+        .map_err(|e| DiagError(format!("Invalid --port: {}", e)))?;
+    let source_peers: usize = args
+        .value_of("source_peers")
+        .expect("error parsing args")
+        .parse()
+        .map_err(|e| DiagError(format!("Invalid --source-peers: {}", e)))?;
+    let diag_workers: usize = args
+        .value_of("diag_workers")
+        .expect("error parsing args")
+        .parse()
+        .map_err(|e| DiagError(format!("Invalid --diag-workers: {}", e)))?;
 
     let timely_configuration = match diag_workers {
         1 => timely::Configuration::Thread,
@@ -71,13 +83,20 @@ You can customize the interface and port for the receiver (this program) with --
 
     match args.subcommand() {
         ("graph", Some(graph_args)) => {
-            let output_path = std::path::Path::new(graph_args.value_of("output_path").expect("error parsing args"));
-            println!("Listening for {} connections on {}:{}", source_peers, ip_addr, port);
+            let output_path = std::path::Path::new(
+                graph_args
+                    .value_of("output_path")
+                    .expect("error parsing args"),
+            );
+            println!(
+                "Listening for {} connections on {}:{}",
+                source_peers, ip_addr, port
+            );
             let sockets = tdiag_connect::receive::open_sockets(ip_addr, port, source_peers)?;
             println!("Trace sources connected");
             crate::commands::graph::listen_and_render(timely_configuration, sockets, output_path)
-        },
-        _                           => panic!("Invalid subcommand"),
+        }
+        _ => panic!("Invalid subcommand"),
     }
 }
 
