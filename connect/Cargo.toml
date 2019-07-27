@@ -10,4 +10,4 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-timely = "^0.9"
+timely = "^0.10"

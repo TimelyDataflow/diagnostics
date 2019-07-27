@@ -10,7 +10,7 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-timely = "^0.9"
-differential-dataflow = "^0.9"
+timely = "^0.10"
+differential-dataflow = "^0.10"
 clap = "^2.33"
 tdiag-connect = "^0.1"
