@@ -1,5 +1,5 @@
 upload-doc = false
-tag-prefix = "v"
+tag-prefix = ""
 pre-release-commit-message = "[tdiag-connect] Release version {{version}}"
 pro-release-commit-message = "[tdiag-connect] Development version {{next_version}}"
 tag-message = "version {{version}}"
