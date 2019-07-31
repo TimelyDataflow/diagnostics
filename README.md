@@ -94,6 +94,56 @@ similar to the following:
 You can use your mouse or touchpad to move the graph around, and to
 zoom in and out.
 
+### `profile` - Visualize the Source Dataflow
+
+The `profile` subcommand reports aggregate runtime for each scope/operator.
+
+```shell
+tdiag --source-peers profile
+```
+
+You should be presented with a notice informing you that `tdiag` is
+waiting for as many connections as specified via `--source-peers` (two
+in this case).
+
+In a separate shell, start your source computation. In this case, we
+will analyse the [Timely PageRank
+example](https://github.com/TimelyDataflow/timely-dataflow/blob/master/timely/examples/pagerank.rs). From
+inside the `timely-dataflow/timely` sub-directory, run:
+
+``` shell
+env TIMELY_WORKER_LOG_ADDR="127.0.0.1:51317" cargo run --example pagerank 1000 1000000 -w 2
+```
+
+Most importantly, `env TIMELY_WORKER_LOG_ADDR="127.0.0.1:51317"` will
+cause the source workers to connect to our diagnostic computation. The
+`-w` parameter specifies the number of workers we want to run the
+PageRank example with. Whatever we specify here therefore has to match
+the `--source-peers` parameter we used when starting `tdiag`.
+
+Once the computation is running, head back to the diagnostic shell,
+where you should now see something like the following:
+
+```shell
+$ tdiag --source-peers 2 profile
+
+Listening for 2 connections on 127.0.0.1:51317
+Trace sources connected
+Press enter to stop collecting profile data (this will crash the source computation if it hasn't terminated).
+```
+
+At any point, press enter as instructed. This will produce an aggregate
+summary of runtime for each scope/operator. Note that the aggregates for the
+scopes (denoted by `[scope]`) include the time of all contained operators.
+
+```shell
+[scope]	Dataflow	(id=0, addr=[0]):	1.17870668e-1 s
+	PageRank	(id=3, addr=[0, 3]):	1.17197194e-1 s
+	Feedback	(id=2, addr=[0, 2]):	3.56249e-4 s
+	Probe	(id=6, addr=[0, 4]):	7.86e-6 s
+	Input	(id=1, addr=[0, 1]):	3.408e-6 s
+```
+
 ## The `tdiag-connect` library
 
 [![Crates.io](https://img.shields.io/crates/v/tdiag-connect.svg)](https://crates.io/crates/tdiag-connect) [![Docs](https://img.shields.io/badge/docs-.rs-blue.svg)](https://docs.rs/tdiag-connect)
