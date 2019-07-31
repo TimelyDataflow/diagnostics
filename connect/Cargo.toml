@@ -1,6 +1,6 @@
 [package]
 name = "tdiag-connect"
-version = "0.2.0"
+version = "0.2.1-pre"
 authors = ["Andrea Lattuada <andrea@lattuada.me>"]
 homepage = "https://github.com/TimelyDataflow/diagnostics"
 repository = "https://github.com/TimelyDataflow/diagnostics.git"
