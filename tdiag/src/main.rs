@@ -27,6 +27,12 @@ You can customize the interface and port for the receiver (this program) with --
              .help("Port to listen on; defaults to 51317")
              .default_value("51317")
              .required(true))
+        .arg(clap::Arg::with_name("differential-port")
+             .long("differential-port")
+             .value_name("PORT")
+             .help("Port to listen on for Differential log streams; defaults to 51318")
+             .default_value("51318")
+             .required(true))
         .arg(clap::Arg::with_name("source_peers")
              .short("s")
              .long("source-peers")
@@ -53,8 +59,29 @@ You can customize the interface and port for the receiver (this program) with --
                 .about("Print total time spent running each operator")
         )
         .subcommand(
-            clap::SubCommand::with_name("arrangements")
-                .about("Track the logical size of arrangements over the course of a computation")                    
+            clap::SubCommand::with_name("differential")
+                .about("Tools for profiling Timely computations that make use of differential dataflow.")
+                .subcommand(
+                    clap::SubCommand::with_name("arrangements")
+                        .about("Track the logical size of arrangements over the course of a computation")
+                        .help("
+Add the following snippet to your Differential computation:
+
+```
+if let Ok(addr) = ::std::env::var(\"DIFFERENTIAL_LOG_ADDR\") {
+    if let Ok(stream) = ::std::net::TcpStream::connect(&addr) {
+        differential_dataflow::logging::enable(worker, stream);
+        info!(\"enabled DIFFERENTIAL logging to {}\", addr);
+    } else {
+        panic!(\"Could not connect to differential log address: {:?}\", addr);
+    }
+}
+```
+
+Then start your computation with the DIFFERENTIAL_LOG_ADDR environment
+variable pointing to the differential-port (51318 by default).
+")
+                )
         )
         .get_matches();
 
@@ -91,29 +118,34 @@ You can customize the interface and port for the receiver (this program) with --
             println!("Trace sources connected");
             crate::commands::profile::listen_and_profile(timely_configuration, sockets)
         }
-        ("arrangements", Some(_args)) => {
-            println!(
-                "Listening for {} Timely connections on {}:{}",
-                source_peers, ip_addr, port
-            );
-            let timely_sockets =
-                tdiag_connect::receive::open_sockets(ip_addr.clone(), port, source_peers)?;
+        ("differential", Some(differential_args)) => {
+            match differential_args.subcommand() {
+                ("arrangements", Some(_args)) => {
+                    println!(
+                        "Listening for {} Timely connections on {}:{}",
+                        source_peers, ip_addr, port
+                    );
+                    let timely_sockets =
+                        tdiag_connect::receive::open_sockets(ip_addr.clone(), port, source_peers)?;
 
-            println!(
-                "Listening for {} Differential connections on {}:{}",
-                source_peers,
-                ip_addr,
-                port + 1
-            );
-            let differential_sockets =
-                tdiag_connect::receive::open_sockets(ip_addr.clone(), port + 1, source_peers)?;
+                    println!(
+                        "Listening for {} Differential connections on {}:{}",
+                        source_peers,
+                        ip_addr,
+                        port + 1
+                    );
+                    let differential_sockets =
+                        tdiag_connect::receive::open_sockets(ip_addr.clone(), port + 1, source_peers)?;
 
-            println!("Trace sources connected");
-            crate::commands::arrangements::listen(
-                timely_configuration,
-                timely_sockets,
-                differential_sockets,
-            )
+                    println!("Trace sources connected");
+                    crate::commands::arrangements::listen(
+                        timely_configuration,
+                        timely_sockets,
+                        differential_sockets,
+                    )
+                }
+                _ => panic!("Invalid subcommand for differential diagnostics"),
+            }
         }
         _ => panic!("Invalid subcommand"),
     }
