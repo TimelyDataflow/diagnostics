@@ -3,7 +3,7 @@
 
 use std::sync::{Arc, Mutex};
 
-use crate::DiagError;
+use crate::{DiagError, LoggingTuple};
 
 use timely::dataflow::operators::{Map, Filter, generic::Operator};
 
@@ -41,9 +41,7 @@ pub fn listen_and_profile(
         let sockets = sockets.clone();
 
         // create replayer from disjoint partition of source worker identifiers.
-        let replayer = tdiag_connect::receive::make_readers::<
-            // TODO: type alias
-            std::time::Duration, (std::time::Duration, timely::logging::WorkerIdentifier, timely::logging::TimelyEvent)>(
+        let replayer = tdiag_connect::receive::make_readers::<std::time::Duration, LoggingTuple>(
             tdiag_connect::receive::ReplaySource::Tcp(sockets), worker.index(), worker.peers())
             .expect("failed to open tcp readers");
 

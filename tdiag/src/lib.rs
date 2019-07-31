@@ -21,3 +21,5 @@ impl From<tdiag_connect::ConnectError> for DiagError {
         }
     }
 }
+
+type LoggingTuple = (std::time::Duration, timely::logging::WorkerIdentifier, timely::logging::TimelyEvent);
