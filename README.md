@@ -94,7 +94,7 @@ similar to the following:
 You can use your mouse or touchpad to move the graph around, and to
 zoom in and out.
 
-### `profile` - Visualize the Source Dataflow
+### `profile` - Profile the Source Dataflow
 
 The `profile` subcommand reports aggregate runtime for each scope/operator.
 
@@ -143,6 +143,89 @@ scopes (denoted by `[scope]`) include the time of all contained operators.
 	Probe	(id=6, addr=[0, 4]):	7.86e-6 s
 	Input	(id=1, addr=[0, 1]):	3.408e-6 s
 ```
+
+## Diagnosing Differential Dataflows
+
+The `differential` subcommand groups diagnostic tools that are only
+relevant to timely dataflows that make use of [differential
+dataflow](https://github.com/TimelyDataflow/differential-dataflow). To
+enable Differential logging in your own computation, add the following
+snippet to your code:
+
+``` rust
+if let Ok(addr) = ::std::env::var("DIFFERENTIAL_LOG_ADDR") {
+    if let Ok(stream) = ::std::net::TcpStream::connect(&addr) {
+        differential_dataflow::logging::enable(worker, stream);
+        info!("enabled DIFFERENTIAL logging to {}", addr);
+    } else {
+        panic!("Could not connect to differential log address: {:?}", addr);
+    }
+}
+```
+
+With this snippet included in your executable, you can use any of the
+following tools to analyse differential-specific aspects of your
+computation.
+
+### `differential arrangements` - Track the Size of Differential Arrangements
+
+Stateful differential dataflow operators often maintain indexed input
+traces called `arrangements`. You will want to understand how these
+traces grow (through the accumulation of new inputs) and shrink
+(through compaction) in size, as your computation executes.
+
+```shell
+tdiag --source-peers differential arrangements
+```
+
+You should be presented with a notice informing you that `tdiag` is
+waiting for as many connections as specified via `--source-peers` (two
+in this case).
+
+In a separate shell, start your source computation. In this case, we
+will analyse the [Differential BFS
+example](https://github.com/TimelyDataflow/differential-dataflow/blob/master/examples/bfs.rs). From
+inside the differential dataflow repository, run:
+
+``` shell
+export TIMELY_WORKER_LOG_ADDR="127.0.0.1:51317"
+export DIFFERENTIAL_LOG_ADDR="127.0.0.1:51318"
+
+cargo run --example bfs 1000 10000 100 20 false -w 2
+```
+
+When analysing differential dataflows (in contrast to pure timely
+computations), both `TIMELY_WORKER_LOG_ADDR` and
+`DIFFERENTIAL_LOG_ADDR` must be set for the source workers to connect
+to our diagnostic computation. The `-w` parameter specifies the number
+of workers we want to run the PageRank example with. Whatever we
+specify here therefore has to match the `--source-peers` parameter we
+used when starting `tdiag`.
+
+Once the computation is running, head back to the diagnostic shell,
+where you should now see something like the following:
+
+```shell
+$ tdiag --source-peers 2 differential arrangements
+
+Listening for 2 Timely connections on 127.0.0.1:51317
+Listening for 2 Differential connections on 127.0.0.1:51318
+Trace sources connected
+(((0, 18), (649, "Arrange ([0, 4, 6])")), 1s, 1)
+(((0, 20), (5944, "Arrange ([0, 4, 7])")), 1s, 1)
+(((0, 28), (3763, "Arrange ([0, 4, 10])")), 1s, 1)
+(((0, 30), (651, "Reduce ([0, 4, 11])")), 1s, 1)
+(((1, 18), (676, "Arrange ([0, 4, 6])")), 1s, 1)
+(((1, 20), (6006, "Arrange ([0, 4, 7])")), 1s, 1)
+(((1, 28), (3889, "Arrange ([0, 4, 10])")), 1s, 1)
+(((1, 30), (678, "Reduce ([0, 4, 11])")), 1s, 1)
+(((0, 18), (649, "Arrange ([0, 4, 6])")), 2s, -1)
+```
+
+An output tuple such as `(((1, 20), (6006, "Arrange ([0, 4, 7])")),
+1s, 1)` should be read as "Arrangement 20 ('Arrange ([0, 4, 7])') at
+worker 1 contains 6006 tuples". Updated sizes will be reported every
+second.
 
 ## The `tdiag-connect` library
 

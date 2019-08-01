@@ -27,12 +27,6 @@ You can customize the interface and port for the receiver (this program) with --
              .help("Port to listen on; defaults to 51317")
              .default_value("51317")
              .required(true))
-        .arg(clap::Arg::with_name("differential-port")
-             .long("differential-port")
-             .value_name("PORT")
-             .help("Port to listen on for Differential log streams; defaults to 51318")
-             .default_value("51318")
-             .required(true))
         .arg(clap::Arg::with_name("source_peers")
              .short("s")
              .long("source-peers")
@@ -61,6 +55,13 @@ You can customize the interface and port for the receiver (this program) with --
         .subcommand(
             clap::SubCommand::with_name("differential")
                 .about("Tools for profiling Timely computations that make use of differential dataflow.")
+                .arg(clap::Arg::with_name("port")
+                     .short("p")
+                     .long("port")
+                     .value_name("PORT")
+                     .help("Port to listen on for Differential log streams; defaults to 51318")
+                     .default_value("51318")
+                     .required(true))
                 .subcommand(
                     clap::SubCommand::with_name("arrangements")
                         .about("Track the logical size of arrangements over the course of a computation")
@@ -79,7 +80,7 @@ if let Ok(addr) = ::std::env::var(\"DIFFERENTIAL_LOG_ADDR\") {
 ```
 
 Then start your computation with the DIFFERENTIAL_LOG_ADDR environment
-variable pointing to the differential-port (51318 by default).
+variable pointing to tdiag's differential port (51318 by default).
 ")
                 )
         )
