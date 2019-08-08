@@ -18,7 +18,13 @@ use DifferentialEvent::{Batch, Merge, MergeShortfall};
 
 use tdiag_connect::receive::ReplayWithShutdown;
 
-/// @TODO
+/// Prints the number of tuples maintained in each arrangement.
+///
+/// 1. Listens to incoming connections from a differential-dataflow
+/// program with timely and differential logging enabled;
+/// 2. runs a differential-dataflow program to track batching and
+/// compaction events and derive number of tuples for each trace;
+/// 3. prints the current size alongside arrangement names;
 pub fn listen(
     timely_configuration: timely::Configuration,
     timely_sockets: Vec<Option<std::net::TcpStream>>,
@@ -78,6 +84,8 @@ pub fn listen(
             let events =
                 differential_replayer.replay_with_shutdown_into(scope, is_running_w.clone());
 
+            // @TODO Think about where to put this.
+            //
             // // Track time spent merging.
             // events
             //     .flat_map(|(t, w, event)| {
