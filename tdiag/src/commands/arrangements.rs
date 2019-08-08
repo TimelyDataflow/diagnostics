@@ -6,14 +6,13 @@ use std::time::Duration;
 
 use crate::DiagError;
 
-use timely::dataflow::operators::generic::operator::Operator;
 use timely::dataflow::operators::{Filter, Map};
 use timely::logging::{TimelyEvent, WorkerIdentifier};
 use TimelyEvent::Operates;
 
 use differential_dataflow::collection::AsCollection;
 use differential_dataflow::logging::DifferentialEvent;
-use differential_dataflow::operators::{Consolidate, Count, Join, Threshold};
+use differential_dataflow::operators::{Count, Join};
 use DifferentialEvent::{Batch, Merge, MergeShortfall};
 
 use tdiag_connect::receive::ReplayWithShutdown;
