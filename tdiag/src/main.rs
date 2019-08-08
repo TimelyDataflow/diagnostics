@@ -65,6 +65,11 @@ You can customize the interface and port for the receiver (this program) with --
                 .subcommand(
                     clap::SubCommand::with_name("arrangements")
                         .about("Track the logical size of arrangements over the course of a computation")
+                        .arg(clap::Arg::with_name("output-interval")
+                             .long("output-interval")
+                             .value_name("MS")
+                             .help("Interval (in ms) at which to print arrangement sizes; defaults to 1000ms")
+                             .default_value("1000"))
                         .help("
 Add the following snippet to your Differential computation:
 
@@ -127,7 +132,7 @@ variable pointing to tdiag's differential port (51318 by default).
                 .map_err(|e| DiagError(format!("Invalid --port: {}", e)))?;
             
             match differential_args.subcommand() {
-                ("arrangements", Some(_args)) => {
+                ("arrangements", Some(args)) => {
                     use std::net::{TcpListener, ToSocketAddrs};
                     
                     let timely_listener = {
@@ -174,11 +179,19 @@ variable pointing to tdiag's differential port (51318 by default).
                         socket.map(Some)
                     }).collect::<Result<Vec<_>, _>>()?;
 
+                    let output_interval_ms: u64 = args.value_of("output-interval")
+                        .expect("error parsing args")
+                        .parse()
+                        .expect("error parsing args");
+
+                    println!("Will report every {}ms", output_interval_ms);
+
                     println!("Trace sources connected");
                     crate::commands::arrangements::listen(
                         timely_configuration,
                         timely_sockets,
                         differential_sockets,
+                        output_interval_ms,
                     )
                 }
                 _ => panic!("Invalid subcommand for differential diagnostics"),

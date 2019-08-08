@@ -28,6 +28,7 @@ pub fn listen(
     timely_configuration: timely::Configuration,
     timely_sockets: Vec<Option<std::net::TcpStream>>,
     differential_sockets: Vec<Option<std::net::TcpStream>>,
+    output_interval_ms: u64, 
 ) -> Result<(), crate::DiagError> {
     let timely_sockets = Arc::new(Mutex::new(timely_sockets));
     let differential_sockets = Arc::new(Mutex::new(differential_sockets));
@@ -57,11 +58,11 @@ pub fn listen(
             worker.index(),
             worker.peers(),
         )
-        .expect("failed to open differential tcp readers");
+            .expect("failed to open differential tcp readers");
+
+        let window_size = Duration::from_millis(output_interval_ms);
 
         worker.dataflow::<Duration, _, _>(|scope| {
-            let window_size = Duration::from_secs(1);
-
             let operates = timely_replayer
                 .replay_with_shutdown_into(scope, is_running_w.clone())
                 .flat_map(|(t, worker, x)| {
