@@ -133,51 +133,20 @@ variable pointing to tdiag's differential port (51318 by default).
             
             match differential_args.subcommand() {
                 ("arrangements", Some(args)) => {
-                    use std::net::{TcpListener, ToSocketAddrs};
+                    // It's crucial that we bind to both listening
+                    // addresses first, before waiting for
+                    // connections. Otherwise we will open up the
+                    // potential for a race condition in the source
+                    // computation.
                     
-                    let timely_listener = {
-                        println!(
-                            "Listening for {} Timely connections on {}:{}",
-                            source_peers, ip_addr, port
-                        );
+                    println!("Listening for {} Timely connections on {}:{}", source_peers, ip_addr, port);
+                    let timely_listener = tdiag_connect::receive::bind(ip_addr, port)?;
 
-                        let socket_addr = (ip_addr, port).to_socket_addrs()?
-                            .next()
-                            .ok_or(tdiag_connect::ConnectError::Other("Invalid listening address".to_string()))?;
+                    println!("Listening for {} Differential connections on {}:{}", source_peers, ip_addr, differential_port);
+                    let differential_listener = tdiag_connect::receive::bind(ip_addr, differential_port)?;
 
-                        TcpListener::bind(socket_addr)?
-                    };
-
-                    let differential_listener = {
-                        println!(
-                            "Listening for {} Differential connections on {}:{}",
-                            source_peers,
-                            ip_addr,
-                            differential_port
-                        );
-
-                        let socket_addr = (ip_addr, differential_port).to_socket_addrs()?
-                            .next()
-                            .ok_or(tdiag_connect::ConnectError::Other("Invalid listening address".to_string()))?;
-
-                        TcpListener::bind(socket_addr)?
-                    };
-
-                    let timely_sockets = (0..source_peers).map(|_| {
-                        let socket = timely_listener.incoming().next().expect("Socket unexpectedly unavailable");
-                        if let Ok(ref s) = &socket {
-                            s.set_nonblocking(true)?;
-                        }
-                        socket.map(Some)
-                    }).collect::<Result<Vec<_>, _>>()?;
-
-                    let differential_sockets = (0..source_peers).map(|_| {
-                        let socket = differential_listener.incoming().next().expect("Socket unexpectedly unavailable");
-                        if let Ok(ref s) = &socket {
-                            s.set_nonblocking(true)?;
-                        }
-                        socket.map(Some)
-                    }).collect::<Result<Vec<_>, _>>()?;
+                    let timely_sockets = tdiag_connect::receive::await_sockets(timely_listener, source_peers)?;
+                    let differential_sockets = tdiag_connect::receive::await_sockets(differential_listener, source_peers)?;
 
                     let output_interval_ms: u64 = args.value_of("output-interval")
                         .expect("error parsing args")
