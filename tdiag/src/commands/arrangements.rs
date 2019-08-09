@@ -84,58 +84,6 @@ pub fn listen(
             let events =
                 differential_replayer.replay_with_shutdown_into(scope, is_running_w.clone());
 
-            // @TODO Think about where to put this.
-            //
-            // // Track time spent merging.
-            // events
-            //     .flat_map(|(t, w, event)| {
-            //         if let Merge(event) = event {
-            //             Some((t, w, event))
-            //         } else {
-            //             None
-            //         }
-            //     })
-            //     .unary(
-            //         timely::dataflow::channels::pact::Pipeline,
-            //         "MergeTimes",
-            //         |_, _| {
-            //             let mut map = std::collections::HashMap::new();
-            //             let mut vec = Vec::new();
-
-            //             move |input, output| {
-            //                 input.for_each(|time, data| {
-            //                     data.swap(&mut vec);
-            //                     let mut session = output.session(&time);
-
-            //                     for (ts, worker, event) in vec.drain(..) {
-            //                         let key = (worker, event.operator);
-
-            //                         match event.complete {
-            //                             None => {
-            //                                 assert!(!map.contains_key(&key));
-            //                                 map.insert(key, ts);
-            //                             }
-            //                             Some(_) => {
-            //                                 assert!(map.contains_key(&key));
-            //                                 let end = map.remove(&key).unwrap();
-            //                                 let ts_clip =
-            //                                     std::time::Duration::from_secs(ts.as_secs() + 1);
-            //                                 let elapsed = ts - end;
-            //                                 let elapsed_ns = (elapsed.as_secs() as isize)
-            //                                     * 1_000_000_000
-            //                                     + (elapsed.subsec_nanos() as isize);
-            //                                 session.give((key.1, ts_clip, elapsed_ns));
-            //                             }
-            //                         }
-            //                     }
-            //                 });
-            //             }
-            //         },
-            //     )
-            //     .as_collection()
-            //     .consolidate()
-            //     .inspect(|x| println!("time {:?}", x));
-
             // Track sizes.
             events
                 .flat_map(|(t, worker, x)| match x {
