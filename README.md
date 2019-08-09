@@ -209,23 +209,30 @@ where you should now see something like the following:
 $ tdiag --source-peers 2 differential arrangements
 
 Listening for 2 Timely connections on 127.0.0.1:51317
-Listening for 2 Differential connections on 127.0.0.1:51318
+Listening for 2 Differential connections on 127.0.0.1:51319
+Will report every 1000ms
 Trace sources connected
-(((0, 18), (649, "Arrange ([0, 4, 6])")), 1s, 1)
-(((0, 20), (5944, "Arrange ([0, 4, 7])")), 1s, 1)
-(((0, 28), (3763, "Arrange ([0, 4, 10])")), 1s, 1)
-(((0, 30), (651, "Reduce ([0, 4, 11])")), 1s, 1)
-(((1, 18), (676, "Arrange ([0, 4, 6])")), 1s, 1)
-(((1, 20), (6006, "Arrange ([0, 4, 7])")), 1s, 1)
-(((1, 28), (3889, "Arrange ([0, 4, 10])")), 1s, 1)
-(((1, 30), (678, "Reduce ([0, 4, 11])")), 1s, 1)
-(((0, 18), (649, "Arrange ([0, 4, 6])")), 2s, -1)
+
+ms	Worker	Op. Id	Name	# of tuples
+1000	0	18	Arrange ([0, 4, 6])	654
+1000	0	20	Arrange ([0, 4, 7])	5944
+1000	0	28	Arrange ([0, 4, 10])	3790
+1000	0	30	Reduce ([0, 4, 11])	654
+1000	1	18	Arrange ([0, 4, 6])	679
+1000	1	20	Arrange ([0, 4, 7])	6006
+1000	1	28	Arrange ([0, 4, 10])	3913
+1000	1	30	Reduce ([0, 4, 11])	678
+2000	0	18	Arrange ([0, 4, 6])	654
+2000	0	18	Arrange ([0, 4, 6])	950
+2000	0	20	Arrange ([0, 4, 7])	5944
+2000	0	20	Arrange ([0, 4, 7])	6937
+2000	0	28	Arrange ([0, 4, 10])	3790
 ```
 
-An output tuple such as `(((1, 20), (6006, "Arrange ([0, 4, 7])")),
-1s, 1)` should be read as "Arrangement 20 ('Arrange ([0, 4, 7])') at
-worker 1 contains 6006 tuples". Updated sizes will be reported every
-second.
+Each row of output specifies the time of the measurement, worker and
+operator ids, the name of the arrangement and the number of tuples it
+maintains. Updated sizes will be reported every second by default,
+this can be controlled via the `output-interval` parameter.
 
 ## The `tdiag-connect` library
 

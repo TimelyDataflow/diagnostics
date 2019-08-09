@@ -84,6 +84,9 @@ pub fn listen(
             let events =
                 differential_replayer.replay_with_shutdown_into(scope, is_running_w.clone());
 
+            // Print output header.
+            println!("ms\tWorker\tOp. Id\tName\t# of tuples");
+
             // Track sizes.
             events
                 .flat_map(|(t, worker, x)| match x {
@@ -121,7 +124,9 @@ pub fn listen(
                 })
                 .count()
                 .join(&operates)
-                .inspect(|x| println!("{:?}", x));
+                .inspect(|(((worker, operator), (count, name)), t, _diff)| {
+                    println!("{}\t{}\t{}\t{}\t{}", t.as_millis(), worker, operator, name, count);
+                });
         })
     })
     .map_err(|x| DiagError(format!("error in the timely computation: {}", x)))?;
