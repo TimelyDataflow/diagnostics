@@ -6,3 +6,4 @@
 
 pub mod graph;
 pub mod profile;
+pub mod arrangements;
