@@ -106,11 +106,6 @@ pub fn listen(
                     }
                 })
                 .as_collection()
-                .inner
-                // We do not bother with retractions here, because the
-                // user is only interested in the current count.
-                .filter(|(_, _, count)| count >= &0)
-                .as_collection()
                 .delay(move |t| {
                     let w_secs = window_size.as_secs();
 
@@ -123,6 +118,11 @@ pub fn listen(
                     Duration::new(secs_coarsened, 0)
                 })
                 .count()
+                .inner
+                // We do not bother with retractions here, because the
+                // user is only interested in the current count.
+                .filter(|(_, _, count)| count >= &0)
+                .as_collection()
                 .join(&operates)
                 .inspect(|(((worker, operator), (count, name)), t, _diff)| {
                     println!("{}\t{}\t{}\t{}\t{}", t.as_millis(), worker, operator, name, count);
