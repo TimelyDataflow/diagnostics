@@ -13,7 +13,7 @@ use TimelyEvent::Operates;
 use differential_dataflow::collection::AsCollection;
 use differential_dataflow::logging::DifferentialEvent;
 use differential_dataflow::operators::{Count, Join};
-use DifferentialEvent::{Batch, Merge, MergeShortfall};
+use DifferentialEvent::{Batch, Merge, MergeShortfall, TraceShare};
 
 use tdiag_connect::receive::ReplayWithShutdown;
 
@@ -103,7 +103,9 @@ pub fn listen(
                     MergeShortfall(x) => {
                         eprintln!("MergeShortfall {:?}", x);
                         None
-                    }
+                    },
+                    DifferentialEvent::Drop(x) => Some(((worker, x.operator), t, -(x.length as isize))),
+                    TraceShare(_x) => None,
                 })
                 .as_collection()
                 .delay(move |t| {
