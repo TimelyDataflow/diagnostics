@@ -58,14 +58,13 @@ where I : IntoIterator,
         let mut antichain = MutableAntichain::new();
 
         builder.build(
-            move |_frontier| { },
-            move |_consumed, internal, produced| {
+            move |progress| {
 
                 if !started {
                     // The first thing we do is modify our capabilities to match the number of streams we manage.
                     // This should be a simple change of `self.event_streams.len() - 1`. We only do this once, as
                     // our very first action.
-                    internal[0].update(Default::default(), (event_streams.len() as i64) - 1);
+                    progress.internals[0].update(Default::default(), (event_streams.len() as i64) - 1);
                     antichain.update_iter(Some((Default::default(), (event_streams.len() as i64) - 1)).into_iter());
                     started = true;
                 }
@@ -77,7 +76,7 @@ where I : IntoIterator,
                             match *event {
                                 Event::Progress(ref vec) => {
                                     antichain.update_iter(vec.iter().cloned());
-                                    internal[0].extend(vec.iter().cloned());
+                                    progress.internals[0].extend(vec.iter().cloned());
                                 },
                                 Event::Messages(ref time, ref data) => {
                                     output.session(time).give_iterator(data.iter().cloned());
@@ -90,14 +89,14 @@ where I : IntoIterator,
                     activator.activate();
 
                     output.cease();
-                    output.inner().produced().borrow_mut().drain_into(&mut produced[0]);
+                    output.inner().produced().borrow_mut().drain_into(&mut progress.produceds[0]);
 
                 } else {
 
                     while !antichain.is_empty() {
                         let elements = antichain.frontier().iter().map(|t| (t.clone(), -1)).collect::<Vec<_>>();
                         for (t, c) in elements.iter() {
-                            internal[0].update(t.clone(), *c);
+                            progress.internals[0].update(t.clone(), *c);
                         }
                         antichain.update_iter(elements);
                     }
