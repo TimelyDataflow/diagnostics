@@ -99,7 +99,7 @@ zoom in and out.
 The `profile` subcommand reports aggregate runtime for each scope/operator.
 
 ```shell
-tdiag --source-peers profile
+tdiag --source-peers 2 profile
 ```
 
 You should be presented with a notice informing you that `tdiag` is
