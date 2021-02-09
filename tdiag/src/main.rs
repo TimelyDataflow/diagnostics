@@ -70,7 +70,7 @@ You can customize the interface and port for the receiver (this program) with --
                              .value_name("MS")
                              .help("Interval (in ms) at which to print arrangement sizes; defaults to 1000ms")
                              .default_value("1000"))
-                        .help("
+                        .after_help("
 Add the following snippet to your Differential computation:
 
 ```
