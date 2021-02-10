@@ -3,6 +3,7 @@
 
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
+use std::convert::TryFrom;
 
 use crate::DiagError;
 
@@ -60,8 +61,6 @@ pub fn listen(
         )
             .expect("failed to open differential tcp readers");
 
-        let window_size = Duration::from_millis(output_interval_ms);
-
         worker.dataflow::<Duration, _, _>(|scope| {
             let operates = timely_replayer
                 .replay_with_shutdown_into(scope, is_running_w.clone())
@@ -109,15 +108,12 @@ pub fn listen(
                 })
                 .as_collection()
                 .delay(move |t| {
-                    let w_secs = window_size.as_secs();
+                    let timestamp: u64 = u64::try_from(t.as_millis())
+                        .expect("Why are the timestamps larger than humans are old?");
 
-                    let secs_coarsened = if w_secs == 0 {
-                        t.as_secs()
-                    } else {
-                        (t.as_secs() / w_secs + 1) * w_secs
-                    };
+                    let window_idx = (timestamp / output_interval_ms) + 1;
 
-                    Duration::new(secs_coarsened, 0)
+                    Duration::from_millis(window_idx * output_interval_ms)
                 })
                 .count()
                 .inner
