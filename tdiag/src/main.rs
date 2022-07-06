@@ -106,8 +106,8 @@ variable pointing to tdiag's differential port (51318 by default).
         .parse().map_err(|e| DiagError(format!("Invalid --diag-workers: {}", e)))?;
 
     let timely_configuration = match diag_workers {
-        1 => timely::Configuration::Thread,
-        n => timely::Configuration::Process(n),
+        1 => timely::Config::thread(),
+        n => timely::Config::process(n),
     };
 
     match args.subcommand() {
