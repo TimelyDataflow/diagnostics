@@ -10,8 +10,8 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-timely = "^0.11"
-differential-dataflow = "^0.11"
+timely = "^0.12.0"
+differential-dataflow = "^0.12.0"
 clap = "^2.33"
 # tdiag-connect = "^0.2"
 tdiag-connect = { path = "../connect" }
