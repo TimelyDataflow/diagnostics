@@ -26,7 +26,7 @@ use tdiag_connect::receive::ReplayWithShutdown;
 /// compaction events and derive number of tuples for each trace;
 /// 3. prints the current size alongside arrangement names;
 pub fn listen(
-    timely_configuration: timely::Configuration,
+    timely_configuration: timely::Config,
     timely_sockets: Vec<Option<std::net::TcpStream>>,
     differential_sockets: Vec<Option<std::net::TcpStream>>,
     output_interval_ms: u64, 

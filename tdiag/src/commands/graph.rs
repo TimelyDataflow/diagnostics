@@ -26,7 +26,7 @@ static GRAPH_HTML: &str = include_str!("graph/dataflow-graph.html");
 ///
 /// This module includes `graph/dataflow-graph.html` as a static resource.
 pub fn listen_and_render(
-    timely_configuration: timely::Configuration,
+    timely_configuration: timely::Config,
     sockets: Vec<Option<std::net::TcpStream>>,
     output_path: &std::path::Path) -> Result<(), crate::DiagError> {
 

@@ -14,6 +14,7 @@ use differential_dataflow::operators::{Join, reduce::Threshold, Consolidate, arr
 use timely::logging::TimelyEvent::{Operates, Schedule};
 
 use tdiag_connect::receive::ReplayWithShutdown;
+use timely::progress::frontier::AntichainRef;
 
 /// Prints aggregate time spent in each scope/operator.
 ///
@@ -24,7 +25,7 @@ use tdiag_connect::receive::ReplayWithShutdown;
 /// 3. prints the resulting measurements alongside operator names and
 /// scope names;
 pub fn listen_and_profile(
-    timely_configuration: timely::Configuration,
+    timely_configuration: timely::Config,
     sockets: Vec<Option<std::net::TcpStream>>) -> Result<(), crate::DiagError> {
 
     let sockets = Arc::new(Mutex::new(sockets));
@@ -119,7 +120,7 @@ pub fn listen_and_profile(
 
         let mut profile_trace = profile_trace;
 
-        profile_trace.distinguish_since(&[]);
+        profile_trace.set_physical_compaction(AntichainRef::new(&[]));
 
         let (mut cursor, storage) = profile_trace.cursor();
 

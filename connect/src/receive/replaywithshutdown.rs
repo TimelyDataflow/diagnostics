@@ -64,8 +64,8 @@ where I : IntoIterator,
                     // The first thing we do is modify our capabilities to match the number of streams we manage.
                     // This should be a simple change of `self.event_streams.len() - 1`. We only do this once, as
                     // our very first action.
-                    progress.internals[0].update(Default::default(), (event_streams.len() as i64) - 1);
-                    antichain.update_iter(Some((Default::default(), (event_streams.len() as i64) - 1)).into_iter());
+                    progress.internals[0].update(T::minimum(), (event_streams.len() as i64) - 1);
+                    antichain.update_iter(Some((T::minimum(), (event_streams.len() as i64) - 1)).into_iter());
                     started = true;
                 }
 
